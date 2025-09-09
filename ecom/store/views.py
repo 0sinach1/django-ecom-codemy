@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Category
 from django.contrib.auth import authenticate ,login , logout
 from django.contrib import messages
@@ -7,21 +7,21 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import SignUpForm
 from django import forms
 
-def category(requests, num):
+def category(request, num):
     num = num.replace('-', ' ')
     
     try:
         category = Category.objects.get(name = num)
         products = Product.objects.filter(category = category)
-        return render(requests, 'category.html', {'products' : products, 'category': category} )
+        return render(request, 'category.html', {'products' : products, 'category': category} )
         
     except:
-        messages.success(requests, ('That category does not exist'))
+        messages.success(request, ('That category does not exist'))
         return redirect('home')
 
 def product(request, pk):
-    product = Product.objects.get(id=pk)
-    return render(request, "products.html", {'products':product})
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, "product.html", {'product': product})
 
 
 def home(request):
