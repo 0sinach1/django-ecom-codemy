@@ -1,15 +1,45 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, Category
+from .models import Product, Category, Profile
 from django.contrib.auth import authenticate ,login , logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .forms import SignUpForm, UpdateUserForm,ChangePasswordForm
+from .forms import SignUpForm, UpdateUserForm,ChangePasswordForm,UserInfoForm
 from django import forms
+from django.db.models import Q
 
 
-def
+def search(request):
+    if request.method == "POST":
+        searched = request.POST['searched']
+        searched = Product.objects.filter(Q(name__icontains = searched) | Q(description__icontains = searched))
+        if not searched:
+            messages.success(request, 'that product does not exist....please try again')
+            return render(request, 'search.html', {})
+        else:
+            return render(request, 'search.html', {'searched' : searched})
+    
 
+        
+    else:
+        return render(request, 'search.html', {})
+
+def update_info(request):
+    if request.user.is_authenticated:
+        current_user = Profile.objects.get(user__id = request.user.id)
+        form = UserInfoForm(request.POST or None, instance = current_user)
+        
+        if form.is_valid():
+            form.save()
+            
+            messages.success(request, ('Your info has been updated'))
+            return redirect('home')
+        return render(request, 'update_info.html', {'form' : form})
+    else:
+        messages.success(request, ('You must be logged in to access that page!!'))
+        return redirect('home')
+    
+    
 def update_password(request):
     if request.user.is_authenticated:
         current_user = request.user
@@ -113,7 +143,7 @@ def register_user(request):
             user = authenticate(username = username, password = password)
             login(request, user)
             messages.success(request, ('You have registrered successfully, Welcome'))
-            return redirect('home')
+            return redirect('update_user')
         else:
             messages.success(request, ('Whoops, there was an error'))
             return redirect('register')
