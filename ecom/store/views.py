@@ -8,6 +8,8 @@ from .forms import SignUpForm, UpdateUserForm,ChangePasswordForm
 from django import forms
 
 
+def
+
 def update_password(request):
     if request.user.is_authenticated:
         current_user = request.user
