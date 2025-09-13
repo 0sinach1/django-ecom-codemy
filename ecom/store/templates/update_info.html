@@ -19,9 +19,20 @@
                         <br>
                         <form method = 'POST' action = {% url 'update_info' %}>
                             {% csrf_token %}
-
+                            <strong>
+                                Billing information
+                            </strong>
                             {{ form.as_p }}
                             <br><br>
+                            <strong>
+                                Shipping information
+                            </strong>
+                            <br>
+                            <br>
+
+                            {{ shipping_form.as_p }}
+                            <br>
+                            <br>
                             <button type = 'submit' class = 'btn btn-secondary'>
                                 Update profile
                             </button>
