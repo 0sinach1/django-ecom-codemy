@@ -30,7 +30,7 @@ def search(request):
 def update_info(request):
     if request.user.is_authenticated:
         current_user = Profile.objects.get(user__id=request.user.id)
-        shipping_user, created = ShippingAddress.objects.get_or_create(user__id=request.user)
+        shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
         
         form = UserInfoForm(request.POST or None, instance=current_user)
         shipping_form = ShippingForm(request.POST or None, instance=shipping_user)

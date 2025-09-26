@@ -17,7 +17,7 @@ class UserAdmin(admin.ModelAdmin):
     field = ['username', 'first_name', 'last_name', 'email']
     inlines = [ProfileInline]
 
-admin.site.unregister(User)
+# admin.site.unregister(User)
 
-admin.site.register(User, UserAdmin)
+# admin.site.register(User, UserAdmin)
 

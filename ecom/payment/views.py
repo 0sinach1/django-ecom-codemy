@@ -4,12 +4,35 @@ from payment.models import ShippingAddress,Order, OrderItem
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-
+from store.models import Product
 
 
 def payment_success(request):
     return render(request, 'payment/payment_success.html', {})
 
+def orders(request, pk):
+    if request.user.is_authenticated and request.user.is_superuser:
+        order = Order.objects.get(id = pk)
+        order_items = OrderItem.objects.filter(order = pk)
+        return render(request, 'payment/orders.html', {})
+
+def shipped_dash(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter(shipped = True) 
+        
+        return render(request, 'payment/shipped_dash.html', {'orders': orders})
+    else:
+        messages.success(request, 'Access Denied')
+        return redirect('home')
+    
+def not_shipped_dash(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter(shipped = False) 
+        
+        return render(request, 'payment/not_shipped_dash.html', {'orders' : orders})
+    else:
+        messages.success(request, 'Access Denied')
+        return redirect('home')
 
 def checkout(request):
     cart = Cart(request)
@@ -56,7 +79,10 @@ def billing_info(request):
 def process_order(request):
     if request.POST:
         cart = Cart(request)
+        cart_products = cart.get_prods
+        quantities = cart.get_quants
         totals = cart.cart_total()
+        
         payment_form = PaymentForm(request.POST or None)
         my_shipping = request.session.get('my_shipping')
         
@@ -70,6 +96,23 @@ def process_order(request):
             create_order =  Order(user=user, full_name=full_name, email=email, shipping_address=shipping_address, amount_paid=amount_paid)
             create_order.save()
             
+            order_id = create_order.pk
+            for product in cart_products():
+                product_id = product.id
+                if product.is_sale:
+                    price = product.sale_price
+                else:
+                    price = product.price
+                    
+                for key, value in quantities().items():
+                    if int(key) == product_id:
+                        # Do NOT use order_id, just use the instance
+                        create_order_item = OrderItem(order=create_order, user=user, product=product, price=price, quantity=value)
+                        create_order_item.save()
+                        
+            for key in list(request.session.keys()):
+                if key == 'session_key':
+                    del request.session[key]
             messages.error(request, 'Order placed Successfully!')
             return redirect('home')
         else:
