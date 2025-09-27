@@ -15,15 +15,24 @@
                             <th scope="col">Price</th>
                             <th scope="col">Customer Email</th>
                             <th scope="col">Date Shipped</th>
+                            <th scope="col">Shipped status</th> 
                         </tr>
                     </thead>
                     <tbody>
                         {% for items in orders %}
                             <tr>
-                                <th scope="row">{{ items.id }}</th>
+                                <th scope="row"> <a href = '{% url "orders" items.id  %}' > {{ items.id }} </a> </th>
                                 <td>{{ items.amount_paid }}</td>
                                 <td>{{ items.email }}</td>
                                 <td>{{ items.date_shipped }}</td>
+                                <td>
+                                    <form method = 'POST'>
+                                        {% csrf_token %}
+                                        <input type = 'hidden' name = 'shipping_status' value = 'true'>
+                                        <input type = 'hidden' name = 'num' value = {{ items.id }}>
+                                        <button type = 'Submit' class = 'btn btn-danger btn-sm'>Mark UnShipped</button>
+                                    </form>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
